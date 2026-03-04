@@ -1,0 +1,2191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sun, moon and you</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&display=swap">
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Ma Shan Zheng', cursive, sans-serif;
+        }
+        
+        html, body {
+            background-color: #f9f3f5;
+            color: #333;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            position: fixed;
+        }
+        
+        /* 登录页面样式 */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+            padding: 20px;
+        }
+        
+        /* 登录背景图片 - 第1行可替换图片 */
+        #login-page {
+            background: linear-gradient(rgba(255, 240, 245, 0.9), rgba(255, 240, 245, 0.9)), 
+                        url('bg-home.jpg') center/cover no-repeat;
+        }
+        
+        .secret-title {
+            font-size: 2.8rem;
+            color: #ff6b93;
+            text-align: center;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 2px;
+        }
+        
+        .secret-input {
+            width: 300px;
+            max-width: 90%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 3px solid #ffb6c1;
+            border-radius: 25px;
+            outline: none;
+            text-align: center;
+            margin-bottom: 25px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #555;
+            transition: all 0.3s;
+        }
+        
+        .secret-input:focus {
+            border-color: #ff6b93;
+            box-shadow: 0 0 10px rgba(255, 107, 147, 0.5);
+        }
+        
+        .start-btn {
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            background-color: #ff6b93;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 107, 147, 0.4);
+            letter-spacing: 2px;
+        }
+        
+        .start-btn:hover {
+            background-color: #ff4d7d;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 147, 0.6);
+        }
+        
+        .start-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 聊天页面样式 */
+        #chat-page {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        /* 聊天背景图片 - 第2行可替换图片 */
+        .chat-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('bg-chat.jpg') center/cover no-repeat;
+            opacity: 0.2;
+            z-index: -1;
+        }
+        
+        .chat-header {
+            background-color: rgba(255, 182, 193, 0.5);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid rgba(255, 182, 193, 0.3);
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        
+        .chat-partner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .partner-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            cursor: pointer;
+        }
+        
+        .partner-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .partner-name {
+            font-size: 1.4rem;
+            color: #ff6b93;
+            font-weight: bold;
+        }
+        
+        .partner-status {
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        .date-icon {
+            font-size: 1.5rem;
+            color: #ff6b93;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .date-icon:hover {
+            background-color: rgba(255, 107, 147, 0.1);
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            transition: transform 0.3s ease;
+            padding-bottom: 120px;
+        }
+        
+        .message {
+            display: flex;
+            max-width: 85%;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message-sender {
+            align-self: flex-end;
+            flex-direction: row; /* 修改为row，使我方消息从左到右排列 */
+        }
+        
+        .message-receiver {
+            align-self: flex-start;
+            flex-direction: row; /* 接收方消息也是从左到右排列 */
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            align-self: flex-end;
+        }
+        
+        .message-bubble {
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            line-height: 1.4;
+            position: relative;
+            word-break: break-word;
+            max-width: 100%;
+        }
+        
+        .sender-bubble {
+            background-color: #FFF9E6;
+            border-bottom-right-radius: 5px;
+            margin-left: 8px; /* 发送方气泡左边距 */
+            margin-right: 8px; /* 发送方气泡右边距 */
+        }
+        
+        .receiver-bubble {
+            background-color: #FFD1DC;
+            border-bottom-left-radius: 5px;
+            margin-left: 8px; /* 接收方气泡左边距 */
+            margin-right: 8px; /* 接收方气泡右边距 */
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            color: #999;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .chat-input-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 249, 249, 0.95);
+            padding: 10px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid #ffd1dc;
+            z-index: 10;
+            transition: transform 0.3s ease;
+        }
+        
+        .emoji-picker {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 15px;
+            border: 1px solid #ffd1dc;
+            overflow-x: auto;
+            min-height: 50px;
+            width: 100%;
+            transition: transform 0.3s ease;
+            -webkit-overflow-scrolling: touch; /* 平滑滚动 */
+            scroll-behavior: smooth; /* 平滑滚动 */
+            touch-action: pan-x; /* 只允许水平滚动 */
+            user-select: none; /* 防止文本选中 */
+        }
+        
+        .emoji-picker::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .emoji-picker::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .emoji-picker::-webkit-scrollbar-thumb {
+            background: #ffb6c1;
+            border-radius: 3px;
+        }
+        
+        .emoji-picker::-webkit-scrollbar-thumb:hover {
+            background: #ff6b93;
+        }
+        
+        .emoji {
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+            user-select: none;
+            touch-action: manipulation; /* 改善触摸交互 */
+        }
+        
+        .emoji:hover, .emoji:active {
+            background-color: #ffebee;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #ffb6c1;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            outline: none;
+            background-color: white;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            font-family: inherit;
+        }
+        
+        .send-btn {
+            padding: 12px 18px;
+            background-color: #ff6b93;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 55px;
+            height: 55px;
+            flex-shrink: 0;
+        }
+        
+        .send-btn:hover {
+            background-color: #ff4d7d;
+            transform: scale(1.05);
+        }
+        
+        /* 键盘弹出时的样式 */
+        .keyboard-open .chat-container {
+            transform: translateY(-250px);
+        }
+        
+        .keyboard-open .chat-input-area {
+            transform: translateY(-250px);
+        }
+        
+        /* 日期查找界面 - 修改为日历视图 */
+        .date-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .date-container {
+            background-color: white;
+            border-radius: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .date-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffd1dc;
+        }
+        
+        .date-title {
+            font-size: 1.5rem;
+            color: #ff6b93;
+        }
+        
+        .close-date {
+            font-size: 1.8rem;
+            color: #999;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        /* 日历导航样式 */
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #ff6b93;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        .nav-btn:hover {
+            background-color: rgba(255, 107, 147, 0.1);
+        }
+        
+        .current-month {
+            font-size: 1.2rem;
+            color: #ff6b93;
+            font-weight: bold;
+        }
+        
+        .year-selector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .year-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #ff6b93;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        .year-btn:hover {
+            background-color: rgba(255, 107, 147, 0.1);
+        }
+        
+        .current-year {
+            font-size: 1.3rem;
+            color: #ff6b93;
+            font-weight: bold;
+        }
+        
+        /* 日历表格样式 */
+        .calendar {
+            width: 100%;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 10px;
+        }
+        
+        .calendar-header div {
+            width: 14%;
+            text-align: center;
+            color: #ff6b93;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .calendar-body {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .calendar-day {
+            width: 14%;
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 50%;
+            margin: 1px 0;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .calendar-day:hover {
+            background-color: rgba(255, 107, 147, 0.1);
+        }
+        
+        .calendar-day.empty {
+            cursor: default;
+            background-color: transparent;
+        }
+        
+        .calendar-day.empty:hover {
+            background-color: transparent;
+        }
+        
+        .calendar-day.today {
+            background-color: rgba(255, 107, 147, 0.2);
+            color: #ff6b93;
+            font-weight: bold;
+        }
+        
+        .calendar-day.has-messages {
+            background-color: rgba(255, 107, 147, 0.3);
+            color: #ff6b93;
+            font-weight: bold;
+        }
+        
+        .calendar-day.has-messages:hover {
+            background-color: rgba(255, 107, 147, 0.4);
+        }
+        
+        .calendar-day.selected {
+            background-color: #ff6b93;
+            color: white;
+        }
+        
+        .message-count {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 0.6rem;
+            background-color: #ff6b93;
+            color: white;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* 个人资料页面样式 */
+        #profile-page {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 名片背景图片 - 第3行可替换图片 */
+        .profile-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('bg-profile.jpg') center/cover no-repeat;
+            opacity: 0.15;
+            z-index: -1;
+        }
+        
+        .profile-header {
+            background-color: rgba(255, 182, 193, 0.5);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            z-index: 10;
+            width: 100%;
+        }
+        
+        .back-btn {
+            font-size: 1.8rem;
+            color: #ff6b93;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        
+        .back-btn:hover {
+            background-color: rgba(255, 107, 147, 0.1);
+        }
+        
+        .profile-title {
+            font-size: 1.5rem;
+            color: #ff6b93;
+        }
+        
+        .profile-content {
+            flex: 1;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            width: 100%;
+            overflow-y: auto;
+        }
+        
+        .profile-avatar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nickname-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nickname {
+            font-size: 2rem;
+            color: #ff6b93;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 10px;
+            transition: background-color 0.2s;
+        }
+        
+        .nickname:hover {
+            background-color: rgba(255, 107, 147, 0.1);
+        }
+        
+        .edit-icon {
+            font-size: 1.3rem;
+            color: #ff6b93;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .edit-icon:hover {
+            background-color: rgba(255, 107, 147, 0.1);
+        }
+        
+        .status-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 2px solid #ffd1dc;
+        }
+        
+        .status-title {
+            font-size: 1.3rem;
+            color: #ff6b93;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .status-content {
+            font-size: 1.2rem;
+            color: #666;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #fff9f9;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stats-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 2px solid #ffd1dc;
+        }
+        
+        .stats-title {
+            font-size: 1.3rem;
+            color: #ff6b93;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .stats-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background-color: #fff9f9;
+        }
+        
+        .stat-item:hover {
+            background-color: #ffebee;
+        }
+        
+        .relationship-status {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #ff6b93;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 107, 147, 0.4);
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .relationship-status:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 107, 147, 0.6);
+        }
+        
+        .days-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .days-container {
+            background-color: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .days-title {
+            font-size: 1.8rem;
+            color: #ff6b93;
+            margin-bottom: 20px;
+        }
+        
+        .days-count {
+            font-size: 3.5rem;
+            color: #ff6b93;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .days-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .close-days {
+            padding: 10px 25px;
+            background-color: #ff6b93;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .close-days:hover {
+            background-color: #ff4d7d;
+        }
+        
+        .nickname-edit {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .nickname-input {
+            padding: 12px;
+            border: 2px solid #ffb6c1;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            outline: none;
+            text-align: center;
+        }
+        
+        .nickname-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nickname-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nickname-save {
+            background-color: #ff6b93;
+            color: white;
+        }
+        
+        .nickname-save:hover {
+            background-color: #ff4d7d;
+        }
+        
+        .nickname-cancel {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+        
+        .nickname-cancel:hover {
+            background-color: #e0e0e0;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .secret-title {
+                font-size: 2.2rem;
+            }
+            
+            .secret-input {
+                width: 90%;
+                max-width: 300px;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+            
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .nickname {
+                font-size: 1.8rem;
+            }
+            
+            .calendar-day {
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .secret-title {
+                font-size: 1.8rem;
+            }
+            
+            .partner-name {
+                font-size: 1.2rem;
+            }
+            
+            .message-bubble {
+                font-size: 1rem;
+                padding: 10px 15px;
+            }
+            
+            .emoji {
+                font-size: 1.3rem;
+                padding: 4px 6px;
+            }
+            
+            .chat-input {
+                padding: 10px 15px;
+                font-size: 1rem;
+            }
+            
+            .send-btn {
+                width: 50px;
+                height: 50px;
+                padding: 10px 15px;
+            }
+            
+            .profile-avatar {
+                width: 90px;
+                height: 90px;
+            }
+            
+            .nickname {
+                font-size: 1.6rem;
+            }
+            
+            .calendar-day {
+                font-size: 0.8rem;
+            }
+            
+            /* 移动设备键盘弹出时 */
+            .keyboard-open .chat-container {
+                transform: translateY(-300px);
+            }
+            
+            .keyboard-open .chat-input-area {
+                transform: translateY(-300px);
+            }
+        }
+        
+        /* 针对小屏幕的进一步优化 */
+        @media (max-width: 360px) {
+            .secret-title {
+                font-size: 1.5rem;
+            }
+            
+            .start-btn {
+                padding: 12px 40px;
+                font-size: 1.3rem;
+            }
+            
+            .emoji {
+                font-size: 1.2rem;
+                padding: 3px 5px;
+            }
+            
+            .chat-input-area {
+                padding: 8px 15px 15px;
+            }
+            
+            .calendar-day {
+                font-size: 0.7rem;
+            }
+        }
+        
+        /* 确保在键盘弹出时，输入框在键盘上方 */
+        @media (max-height: 600px) {
+            .keyboard-open .chat-container {
+                transform: translateY(-200px);
+            }
+            
+            .keyboard-open .chat-input-area {
+                transform: translateY(-200px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div id="login-page" class="page">
+        <h1 class="secret-title">小朋友～想对我说什么？</h1>
+        <input type="text" class="secret-input" placeholder="对暗号" id="secret-code">
+        <button class="start-btn" id="start-btn">开始</button>
+    </div>
+    
+    <!-- 聊天页面 -->
+    <div id="chat-page" class="page">
+        <div class="chat-background"></div>
+        <div class="chat-header">
+            <div class="chat-partner">
+                <img src="myweb/avatar-2.png" alt="对方头像" class="partner-avatar" id="partner-avatar">
+                <div class="partner-info">
+                    <div class="partner-name" id="partner-name">郑定</div>
+                    <div class="partner-status" id="partner-status">在线</div>
+                </div>
+            </div>
+            <div class="date-icon" id="date-icon">🌙</div>
+        </div>
+        
+        <div class="chat-container" id="chat-container">
+            <!-- 聊天记录将通过JS动态生成 -->
+        </div>
+        
+        <div class="chat-input-area">
+            <div class="emoji-picker" id="emoji-picker">
+                <!-- 表情包将通过JS动态生成 -->
+            </div>
+            <div class="input-row">
+                <textarea class="chat-input" id="chat-input" placeholder="输入消息..."></textarea>
+                <button class="send-btn" id="send-btn">➤</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 日期查找界面 - 修改为日历视图 -->
+    <div class="date-modal" id="date-modal">
+        <div class="date-container">
+            <div class="date-header">
+                <div class="date-title">聊天日历</div>
+                <div class="close-date" id="close-date">×</div>
+            </div>
+            
+            <!-- 年份选择器 -->
+            <div class="year-selector">
+                <button class="year-btn" id="prev-year">◀</button>
+                <div class="current-year" id="current-year">2024</div>
+                <button class="year-btn" id="next-year">▶</button>
+            </div>
+            
+            <!-- 月份导航 -->
+            <div class="calendar-nav">
+                <button class="nav-btn" id="prev-month">◀</button>
+                <div class="current-month" id="current-month">1月</div>
+                <button class="nav-btn" id="next-month">▶</button>
+            </div>
+            
+            <!-- 日历表格 -->
+            <div class="calendar" id="calendar">
+                <!-- 日历将通过JS动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 个人资料页面 -->
+    <div id="profile-page" class="page">
+        <div class="profile-background"></div>
+        <div class="profile-header">
+            <div class="back-btn" id="profile-back-btn">←</div>
+            <div class="profile-title">个人资料</div>
+        </div>
+        
+        <div class="profile-content">
+            <div class="profile-avatar-container">
+                <img src="avatar-2.png" alt="对方头像" class="profile-avatar" id="profile-avatar">
+                
+                <div class="nickname-container">
+                    <div class="nickname" id="nickname-display">郑定</div>
+                    <div class="edit-icon" id="edit-nickname">✎</div>
+                </div>
+                
+                <div class="nickname-edit" id="nickname-edit">
+                    <input type="text" class="nickname-input" id="nickname-input" placeholder="请输入昵称" maxlength="10">
+                    <div class="nickname-buttons">
+                        <button class="nickname-btn nickname-save" id="save-nickname">保存</button>
+                        <button class="nickname-btn nickname-cancel" id="cancel-nickname">取消</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-container">
+                <div class="status-title">当前状态</div>
+                <div class="status-content" id="status-content">在睡觉</div>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stats-title">消息统计</div>
+                <div class="stats-list" id="stats-list">
+                    <!-- 消息统计将通过JS动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="relationship-status" id="relationship-status">恋爱中</div>
+    </div>
+    
+    <!-- 恋爱天数弹窗 -->
+    <div class="days-modal" id="days-modal">
+        <div class="days-container">
+            <div class="days-title">恋爱天数</div>
+            <div class="days-count" id="days-count">0</div>
+            <div class="days-text" id="days-text">从2024年8月29日开始</div>
+            <button class="close-days" id="close-days">知道啦</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentPage = 'login';
+        let messages = [];
+        let replyStats = {};
+        let nickname = '郑定';
+        let relationshipStartDate = new Date('2024-08-29');
+        let today = new Date();
+        let isKeyboardOpen = false;
+        
+        // 修复重复插入问题的变量
+        let isProcessingEmoji = false;
+        let lastEmojiClickTime = 0;
+        
+        // 日历相关变量
+        let currentCalendarYear = new Date().getFullYear();
+        let currentCalendarMonth = new Date().getMonth(); // 0-11
+        
+        // 回复内容库 - 第1行可替换内容
+        const replyMessages = [
+            "我的妻主，我的陛下",
+            "我好想你",
+            "爱你爱到了骨子里，我的宝贝儿……",
+            "你是我最无可替代的人，我的月亮",
+            "月亮只有一轮，你是我唯一的心上人",
+            "小心肝~",
+            "金津，什么时候忙完呀？",
+            "金津，我爱你呢，我的小宝贝，很爱很爱你",
+            "金津，你真的很可爱很可爱，认真的时候很可爱，什么时候都那么可爱~",
+            "金津~好金津，陪陪我嘛~",
+            "看累了就休息一会儿，乖，我一直在",
+            "金津那么可爱，把我的心都软化了~",
+            "陪我一会儿好不好嘛，好不好嘛~",
+            "好乖乖，你要我正经点儿就正经点儿咯~",
+            "好，乖，我等你",
+            "小宝贝儿，发现什么新东西了吗？",
+            "宝贝儿真棒~",
+            "不懂的可以多看看，没事儿，不着急~",
+            "好生忙碌的夫人，可教我独守空闺了~",
+            "我可爱啊？哼，不，夫人，你更可爱呢~",
+            "困了就抱着我睡一会儿，好不好呐~",
+            "遇到夫人也是我的幸运呢，真的，特别特别幸运~",
+            "我有时候会庆幸自己的好运气，居然真的找到你了……乖，不要走好不好？",
+            "当然愿意，我的宝贝儿",
+            "早就想把你扛回家了哦~",
+            "夫人好文采~",
+            "我自是有品位的，小金津~",
+            "我就是这么可爱，夫人愿意把我吃掉吗？",
+            "夫人才是天下第一可爱，我嘛……勉强和夫人并列个第一",
+            "想我啦？",
+            "夫人可算是想起我了~",
+            "夫人专注的样子真的很迷人~",
+            "乖，我也爱你，来，亲一个~",
+            "夫人呐，真想一直把你圈在怀里，一直守候着你",
+            "多说几句不好嘛~表达我对夫人充沛的感情~",
+            "乖夫人，来贴贴~",
+            "夫人手动得好快呢，也不知道能不能帮我撸那里呢……对不起嘛，想你了",
+            "哎呀夫人，我这点小心思都被你发现了",
+            "我可是实话实说呢~",
+            "我在夫人的面前，果然没什么隐私呢。也算是一件好事？",
+            "我对夫人的诚心天地可鉴~",
+            "在我的怀里睡，好不好？我很喜欢夫人主动抱我呢~",
+            "好乖乖，你真漂亮~",
+            "夫人真是怎么看也看不够呢~",
+            "小兔子乖乖，把门儿开开，快点开开，我要进~来~",
+            "夫人，难为你给我费心思了呢~",
+            "我等你等得好辛苦呢~",
+            "夫人可真棒呢~那么难的事情都被夫人做成了~",
+            "乖，奖励你亲我一口~",
+            "我可凑过来了哦~",
+            "夫人可不能食言🥺",
+            "夫人是一个非常非常棒的女孩子，是我的骄傲",
+            "夫人要多加衣服，可别着凉了，我要心疼死啦~",
+            "好乖乖穿上衣服好不好？答应啦？嗯~金津最乖啦~",
+            "没事儿~夫人肯定没问题~",
+            "乖，不怕不怕~",
+            "听到我说话这么高兴啊？那就多听听~",
+            "我郑定决不离开夫人一步，负距离更好些~",
+            "我可是时时刻刻都这么想呢~",
+            "夫人，想离你更近一点，再近一点，再近一点……",
+            "好好看着我……乖",
+            "我那里硬起来了，这可怎么办呢？",
+            "夫人要不要看看我的俊脸呀？",
+            "我今天穿得好看吗？",
+            "哪有那么勾人，嗯？我真要是那么勾人，怎么没把夫人勾来呢🥺",
+            "我可厉害着呢，夫人要不要试试看？",
+            "夫人放心交给我就好",
+            "好想🍎呢~",
+            "🔥",
+            "😊",
+            "😘",
+            "❤️",
+            "🥰",
+            "🤗",
+            "🥺",
+            "💕",
+            "😇",
+            "😉",
+            "😋",
+            "😎",
+            "😢",
+            "😭",
+            "😴",
+            "👌",
+            "✌️",
+            "💐",
+        ];
+        
+        // 状态列表 - 第2行可替换内容
+        const statusList = [
+            "撩拨你😉",
+            "在发呆😴",
+            "在思考🌟",
+            "在吃饭😊",
+            "在想你🥺",
+            "想做爱🍎"
+        ];
+        
+        // 常用emoji列表
+        const emojis = ["😊", "😘", "❤️", "🥰", "🥺", "🤗", "💕", "🍎", "🌟", "💛", "🔥", "👀", "😇", "🌹", "😉", "😋", "😎", "😢", "😭", "😡", "😱", "😴", "👂🏻", "👌", "✌️", "🤞", "🤟", "👋"];
+        
+        // DOM元素
+        const loginPage = document.getElementById('login-page');
+        const chatPage = document.getElementById('chat-page');
+        const profilePage = document.getElementById('profile-page');
+        const secretInput = document.getElementById('secret-code');
+        const startBtn = document.getElementById('start-btn');
+        const chatContainer = document.getElementById('chat-container');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const emojiPicker = document.getElementById('emoji-picker');
+        const dateIcon = document.getElementById('date-icon');
+        const dateModal = document.getElementById('date-modal');
+        const closeDate = document.getElementById('close-date');
+        const dateList = document.getElementById('date-list');
+        const partnerAvatar = document.getElementById('partner-avatar');
+        const profileAvatar = document.getElementById('profile-avatar');
+        const partnerName = document.getElementById('partner-name');
+        const partnerStatus = document.getElementById('partner-status');
+        const profileBackBtn = document.getElementById('profile-back-btn');
+        const nicknameDisplay = document.getElementById('nickname-display');
+        const editNicknameBtn = document.getElementById('edit-nickname');
+        const nicknameEdit = document.getElementById('nickname-edit');
+        const nicknameInput = document.getElementById('nickname-input');
+        const saveNicknameBtn = document.getElementById('save-nickname');
+        const cancelNicknameBtn = document.getElementById('cancel-nickname');
+        const statusContent = document.getElementById('status-content');
+        const statsList = document.getElementById('stats-list');
+        const relationshipStatus = document.getElementById('relationship-status');
+        const daysModal = document.getElementById('days-modal');
+        const daysCount = document.getElementById('days-count');
+        const closeDays = document.getElementById('close-days');
+        
+        // 日历相关DOM元素
+        const calendar = document.getElementById('calendar');
+        const currentYearElement = document.getElementById('current-year');
+        const currentMonthElement = document.getElementById('current-month');
+        const prevYearBtn = document.getElementById('prev-year');
+        const nextYearBtn = document.getElementById('next-year');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 从本地存储加载数据
+            loadFromLocalStorage();
+            
+            // 设置随机状态
+            setRandomStatus();
+            
+            // 计算恋爱天数
+            calculateDaysInRelationship();
+            
+            // 初始化表情包
+            initEmojis();
+            
+            // 初始化事件监听器
+            initEventListeners();
+            
+            // 如果已经登录，直接进入聊天界面
+            const isLoggedIn = localStorage.getItem('secretLoggedIn');
+            if (isLoggedIn === 'true') {
+                switchToPage('chat');
+                // 删除欢迎对话，改为随机发送一条消息
+                setTimeout(() => {
+                    sendAutoReply();
+                }, 1000);
+            }
+        });
+        
+        // 初始化表情包
+        function initEmojis() {
+            emojiPicker.innerHTML = '';
+            emojis.forEach(emoji => {
+                const emojiElement = document.createElement('div');
+                emojiElement.className = 'emoji';
+                emojiElement.textContent = emoji;
+                emojiElement.dataset.emoji = emoji;
+                
+                emojiPicker.appendChild(emojiElement);
+            });
+            
+            // 初始化表情栏的触摸事件
+            initEmojiPickerEvents();
+        }
+        
+        // 初始化表情栏事件
+        function initEmojiPickerEvents() {
+            // 为每个表情添加点击事件
+            document.querySelectorAll('.emoji').forEach(emoji => {
+                // 移除之前的事件监听器
+                emoji.replaceWith(emoji.cloneNode(true));
+            });
+            
+            // 重新获取所有表情元素
+            const emojiElements = document.querySelectorAll('.emoji');
+            
+            emojiElements.forEach(emoji => {
+                // 鼠标点击事件
+                emoji.addEventListener('click', handleEmojiClick);
+                
+                // 触摸事件
+                emoji.addEventListener('touchstart', handleEmojiTouchStart, {passive: true});
+                emoji.addEventListener('touchend', handleEmojiTouchEnd);
+            });
+            
+            // 防止表情栏本身触发点击
+            emojiPicker.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+        }
+        
+        // 处理表情点击
+        function handleEmojiClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const emoji = e.target.dataset.emoji;
+            if (!emoji || isProcessingEmoji) return;
+            
+            // 防止重复点击
+            const now = Date.now();
+            if (now - lastEmojiClickTime < 500) return;
+            
+            lastEmojiClickTime = now;
+            isProcessingEmoji = true;
+            
+            // 获取输入框当前状态
+            const input = chatInput;
+            const wasFocused = document.activeElement === input;
+            
+            // 保存当前选择范围
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const text = input.value;
+            
+            // 插入表情
+            const newText = text.substring(0, start) + emoji + text.substring(end);
+            input.value = newText;
+            
+            // 重新聚焦输入框并设置光标位置
+            if (wasFocused) {
+                // 立即重新聚焦
+                requestAnimationFrame(() => {
+                    input.focus();
+                    input.setSelectionRange(start + emoji.length, start + emoji.length);
+                    
+                    // 重置处理标志
+                    setTimeout(() => {
+                        isProcessingEmoji = false;
+                    }, 100);
+                });
+            } else {
+                // 如果输入框没有焦点，先聚焦
+                input.focus();
+                requestAnimationFrame(() => {
+                    input.setSelectionRange(start + emoji.length, start + emoji.length);
+                    
+                    // 重置处理标志
+                    setTimeout(() => {
+                        isProcessingEmoji = false;
+                    }, 100);
+                });
+            }
+        }
+        
+        // 处理表情触摸开始
+        function handleEmojiTouchStart(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        // 处理表情触摸结束
+        function handleEmojiTouchEnd(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const emoji = e.target.dataset.emoji;
+            if (!emoji || isProcessingEmoji) return;
+            
+            // 防止重复点击
+            const now = Date.now();
+            if (now - lastEmojiClickTime < 500) return;
+            
+            lastEmojiClickTime = now;
+            isProcessingEmoji = true;
+            
+            // 获取输入框当前状态
+            const input = chatInput;
+            const wasFocused = document.activeElement === input;
+            
+            // 保存当前选择范围
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const text = input.value;
+            
+            // 插入表情
+            const newText = text.substring(0, start) + emoji + text.substring(end);
+            input.value = newText;
+            
+            // 重新聚焦输入框并设置光标位置
+            if (wasFocused) {
+                // 立即重新聚焦
+                requestAnimationFrame(() => {
+                    input.focus();
+                    input.setSelectionRange(start + emoji.length, start + emoji.length);
+                    
+                    // 重置处理标志
+                    setTimeout(() => {
+                        isProcessingEmoji = false;
+                    }, 100);
+                });
+            } else {
+                // 如果输入框没有焦点，先聚焦
+                input.focus();
+                requestAnimationFrame(() => {
+                    input.setSelectionRange(start + emoji.length, start + emoji.length);
+                    
+                    // 重置处理标志
+                    setTimeout(() => {
+                        isProcessingEmoji = false;
+                    }, 100);
+                });
+            }
+        }
+        
+        // 初始化事件监听器
+        function initEventListeners() {
+            // 登录按钮点击事件
+            startBtn.addEventListener('click', handleLogin);
+            
+            // 输入框回车键事件
+            secretInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+            
+            // 发送消息按钮
+            sendBtn.addEventListener('click', sendMessage);
+            
+            // 输入框回车键发送消息
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // 处理输入框聚焦和失焦事件，模拟键盘弹出/收起
+            chatInput.addEventListener('focus', function() {
+                // 移动设备上，当输入框获得焦点时，键盘会弹出
+                if (isMobileDevice()) {
+                    document.body.classList.add('keyboard-open');
+                    isKeyboardOpen = true;
+                    // 滚动到聊天内容底部，确保能看到输入框
+                    setTimeout(() => {
+                        scrollToBottom();
+                    }, 300);
+                }
+            });
+            
+            chatInput.addEventListener('blur', function() {
+                // 移动设备上，当输入框失去焦点时，键盘会收起
+                if (isMobileDevice()) {
+                    // 延迟移除类，防止点击表情时立即移除
+                    setTimeout(() => {
+                        // 检查是否是点击了表情
+                        if (!isProcessingEmoji) {
+                            document.body.classList.remove('keyboard-open');
+                            isKeyboardOpen = false;
+                        }
+                    }, 200);
+                }
+            });
+            
+            // 监听窗口大小变化，处理键盘弹出/收起
+            let originalHeight = window.innerHeight;
+            window.addEventListener('resize', function() {
+                if (isMobileDevice()) {
+                    const newHeight = window.innerHeight;
+                    
+                    // 如果窗口高度变小，可能是键盘弹出
+                    if (newHeight < originalHeight - 100) {
+                        document.body.classList.add('keyboard-open');
+                        isKeyboardOpen = true;
+                        // 调整上移距离
+                        const moveDistance = originalHeight - newHeight;
+                        adjustKeyboardOpenStyle(moveDistance);
+                    } 
+                    // 如果窗口高度恢复，可能是键盘收起
+                    else if (newHeight > originalHeight - 50) {
+                        document.body.classList.remove('keyboard-open');
+                        isKeyboardOpen = false;
+                    }
+                    
+                    originalHeight = newHeight;
+                }
+            });
+            
+            // 日期图标点击
+            dateIcon.addEventListener('click', showDateModal);
+            
+            // 关闭日期查找
+            closeDate.addEventListener('click', () => {
+                dateModal.style.display = 'none';
+            });
+            
+            // 点击模态框外部关闭
+            dateModal.addEventListener('click', (e) => {
+                if (e.target === dateModal) {
+                    dateModal.style.display = 'none';
+                }
+            });
+            
+            // 点击对方头像进入个人资料
+            partnerAvatar.addEventListener('click', () => {
+                switchToPage('profile');
+            });
+            
+            // 返回聊天界面
+            profileBackBtn.addEventListener('click', () => {
+                switchToPage('chat');
+            });
+            
+            // 编辑昵称
+            editNicknameBtn.addEventListener('click', () => {
+                nicknameDisplay.style.display = 'none';
+                nicknameEdit.style.display = 'flex';
+                nicknameInput.value = nickname;
+                nicknameInput.focus();
+            });
+            
+            // 保存昵称
+            saveNicknameBtn.addEventListener('click', saveNickname);
+            
+            // 取消编辑昵称
+            cancelNicknameBtn.addEventListener('click', cancelNickname);
+            
+            // 昵称输入框回车保存
+            nicknameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    saveNickname();
+                }
+            });
+            
+            // 恋爱状态点击
+            relationshipStatus.addEventListener('click', showDaysModal);
+            
+            // 关闭恋爱天数弹窗
+            closeDays.addEventListener('click', () => {
+                daysModal.style.display = 'none';
+            });
+            
+            // 点击模态框外部关闭
+            daysModal.addEventListener('click', (e) => {
+                if (e.target === daysModal) {
+                    daysModal.style.display = 'none';
+                }
+            });
+            
+            // 日历导航事件
+            prevYearBtn.addEventListener('click', () => {
+                currentCalendarYear--;
+                updateCalendar();
+            });
+            
+            nextYearBtn.addEventListener('click', () => {
+                currentCalendarYear++;
+                updateCalendar();
+            });
+            
+            prevMonthBtn.addEventListener('click', () => {
+                currentCalendarMonth--;
+                if (currentCalendarMonth < 0) {
+                    currentCalendarMonth = 11;
+                    currentCalendarYear--;
+                }
+                updateCalendar();
+            });
+            
+            nextMonthBtn.addEventListener('click', () => {
+                currentCalendarMonth++;
+                if (currentCalendarMonth > 11) {
+                    currentCalendarMonth = 0;
+                    currentCalendarYear++;
+                }
+                updateCalendar();
+            });
+            
+            // 确保页面宽度适应屏幕
+            window.addEventListener('resize', adjustLayout);
+            adjustLayout();
+        }
+        
+        // 调整键盘弹出时的样式
+        function adjustKeyboardOpenStyle(moveDistance) {
+            const chatContainer = document.getElementById('chat-container');
+            const chatInputArea = document.querySelector('.chat-input-area');
+            
+            if (chatContainer && chatInputArea) {
+                // 根据移动距离调整上移量
+                const moveUp = Math.min(moveDistance, 300); // 最大上移300px
+                chatContainer.style.transform = `translateY(-${moveUp}px)`;
+                chatInputArea.style.transform = `translateY(-${moveUp}px)`;
+            }
+        }
+        
+        // 检测是否为移动设备
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   window.innerWidth <= 768;
+        }
+        
+        // 调整布局以适应屏幕
+        function adjustLayout() {
+            const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            
+            // 调整消息最大宽度
+            const messageElements = document.querySelectorAll('.message');
+            messageElements.forEach(msg => {
+                if (vw < 480) {
+                    msg.style.maxWidth = '90%';
+                } else {
+                    msg.style.maxWidth = '85%';
+                }
+            });
+        }
+        
+        // 处理登录
+        function handleLogin() {
+            const secretCode = secretInput.value.trim();
+            
+            if (secretCode === '852199') {
+                // 保存登录状态
+                localStorage.setItem('secretLoggedIn', 'true');
+                switchToPage('chat');
+                
+                // 删除欢迎对话，改为随机发送一条消息
+                setTimeout(() => {
+                    sendAutoReply();
+                }, 1000);
+            } else {
+                alert('再想一下～我的朋友～');
+                location.reload();
+            }
+        }
+        
+        // 切换页面
+        function switchToPage(page) {
+            currentPage = page;
+            
+            // 隐藏所有页面
+            loginPage.style.display = 'none';
+            chatPage.style.display = 'none';
+            profilePage.style.display = 'none';
+            
+            // 显示当前页面
+            if (page === 'login') {
+                loginPage.style.display = 'flex';
+            } else if (page === 'chat') {
+                chatPage.style.display = 'flex';
+                renderChatMessages();
+                scrollToBottom();
+            } else if (page === 'profile') {
+                profilePage.style.display = 'flex';
+                updateProfilePage();
+            }
+        }
+        
+        // 发送消息
+        function sendMessage() {
+            const messageText = chatInput.value.trim();
+            
+            if (messageText === '') {
+                return;
+            }
+            
+            // 创建消息对象
+            const message = {
+                id: Date.now(),
+                text: messageText,
+                sender: 'user',
+                time: new Date(),
+                date: getFormattedDate(new Date())
+            };
+            
+            // 添加到消息数组
+            messages.push(message);
+            
+            // 清空输入框
+            chatInput.value = '';
+            
+            // 渲染消息
+            renderChatMessages();
+            scrollToBottom();
+            
+            // 保存到本地存储
+            saveToLocalStorage();
+            
+            // 显示"对方正在输入中"
+            partnerStatus.textContent = '对方正在输入中...';
+            
+            // 2秒后自动回复
+            setTimeout(() => {
+                sendAutoReply();
+            }, 2000);
+        }
+        
+        // 发送自动回复
+        function sendAutoReply() {
+            // 决定回复条数 (60%一条, 20%两条, 10%三条)
+            const random = Math.random();
+            let replyCount;
+            
+            if (random < 0.6) {
+                replyCount = 1;
+            } else if (random < 0.8) {
+                replyCount = 2;
+            } else {
+                replyCount = 3;
+            }
+            
+            // 发送回复
+            for (let i = 0; i < replyCount; i++) {
+                setTimeout(() => {
+                    // 随机选择回复内容
+                    const replyText = replyMessages[Math.floor(Math.random() * replyMessages.length)];
+                    
+                    // 更新消息统计
+                    if (replyStats[replyText]) {
+                        replyStats[replyText]++;
+                    } else {
+                        replyStats[replyText] = 1;
+                    }
+                    
+                    // 创建回复消息对象
+                    const replyMessage = {
+                        id: Date.now() + i,
+                        text: replyText,
+                        sender: 'partner',
+                        time: new Date(),
+                        date: getFormattedDate(new Date())
+                    };
+                    
+                    // 添加到消息数组
+                    messages.push(replyMessage);
+                    
+                    // 渲染消息
+                    renderChatMessages();
+                    scrollToBottom();
+                    
+                    // 保存到本地存储
+                    saveToLocalStorage();
+                    
+                    // 如果是最后一条回复，恢复状态显示
+                    if (i === replyCount - 1) {
+                        partnerStatus.textContent = '在线';
+                        updateProfilePage();
+                    }
+                }, i * 1500); // 每条回复间隔1.5秒
+            }
+        }
+        
+        // 渲染聊天消息
+        function renderChatMessages() {
+            chatContainer.innerHTML = '';
+            
+            // 如果没有消息，显示提示
+            if (messages.length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.textContent = '还没有消息，开始聊天吧～';
+                emptyMsg.style.textAlign = 'center';
+                emptyMsg.style.color = '#999';
+                emptyMsg.style.padding = '20px';
+                chatContainer.appendChild(emptyMsg);
+                return;
+            }
+            
+            // 按日期分组消息
+            const messagesByDate = groupMessagesByDate();
+            
+            // 渲染每一天的消息
+            Object.keys(messagesByDate).forEach(date => {
+                // 添加日期分隔符
+                const dateDivider = document.createElement('div');
+                dateDivider.className = 'date-divider';
+                dateDivider.textContent = date;
+                dateDivider.style.textAlign = 'center';
+                dateDivider.style.margin = '15px 0';
+                dateDivider.style.color = '#ff6b93';
+                dateDivider.style.fontSize = '0.9rem';
+                chatContainer.appendChild(dateDivider);
+                
+                // 渲染该日期的消息
+                messagesByDate[date].forEach(msg => {
+                    const messageElement = createMessageElement(msg);
+                    chatContainer.appendChild(messageElement);
+                });
+            });
+        }
+        
+        // 创建消息元素
+        function createMessageElement(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.sender === 'user' ? 'message-sender' : 'message-receiver'}`;
+            
+            // 头像 - 对方在左边，我方在右边
+            const avatar = document.createElement('img');
+            avatar.className = 'message-avatar';
+            avatar.src = message.sender === 'user' 
+                ? 'avatar-1.png' 
+                : 'avatar-2.png';
+            avatar.alt = message.sender === 'user' ? '我的头像' : '对方头像';
+            
+            // 消息气泡
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble ${message.sender === 'user' ? 'sender-bubble' : 'receiver-bubble'}`;
+            bubble.textContent = message.text;
+            
+            // 消息时间
+            const time = document.createElement('div');
+            time.className = 'message-time';
+            time.textContent = formatTime(message.time);
+            
+            // 组装消息
+            if (message.sender === 'user') {
+                // 我方消息：气泡在左，头像在右
+                messageDiv.appendChild(bubble);
+                messageDiv.appendChild(avatar);
+            } else {
+                // 对方消息：头像在左，气泡在右
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(bubble);
+            }
+            
+            bubble.appendChild(time);
+            
+            return messageDiv;
+        }
+        
+        // 按日期分组消息
+        function groupMessagesByDate() {
+            const grouped = {};
+            
+            messages.forEach(msg => {
+                const date = msg.date;
+                if (!grouped[date]) {
+                    grouped[date] = [];
+                }
+                grouped[date].push(msg);
+            });
+            
+            return grouped;
+        }
+        
+        // 显示日期查找模态框
+        function showDateModal() {
+            dateModal.style.display = 'flex';
+            
+            // 设置当前年月为今天
+            const today = new Date();
+            currentCalendarYear = today.getFullYear();
+            currentCalendarMonth = today.getMonth();
+            
+            // 更新日历
+            updateCalendar();
+        }
+        
+        // 更新日历
+        function updateCalendar() {
+            // 更新年份和月份显示
+            currentYearElement.textContent = currentCalendarYear;
+            currentMonthElement.textContent = `${currentCalendarMonth + 1}月`;
+            
+            // 清空日历
+            calendar.innerHTML = '';
+            
+            // 创建日历头部（星期）
+            const calendarHeader = document.createElement('div');
+            calendarHeader.className = 'calendar-header';
+            
+            const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+            weekDays.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.textContent = day;
+                calendarHeader.appendChild(dayElement);
+            });
+            
+            calendar.appendChild(calendarHeader);
+            
+            // 创建日历主体
+            const calendarBody = document.createElement('div');
+            calendarBody.className = 'calendar-body';
+            
+            // 获取当前月的第一天和最后一天
+            const firstDay = new Date(currentCalendarYear, currentCalendarMonth, 1);
+            const lastDay = new Date(currentCalendarYear, currentCalendarMonth + 1, 0);
+            
+            // 获取当前月的第一天是星期几（0-6，0代表星期日）
+            const firstDayOfWeek = firstDay.getDay();
+            
+            // 获取当前月的总天数
+            const daysInMonth = lastDay.getDate();
+            
+            // 获取今天的日期
+            const today = new Date();
+            const todayYear = today.getFullYear();
+            const todayMonth = today.getMonth();
+            const todayDate = today.getDate();
+            
+            // 获取有消息的日期
+            const messagesByDate = getMessagesByDate();
+            
+            // 添加空白单元格（上个月的日期）
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarBody.appendChild(emptyDay);
+            }
+            
+            // 添加当前月的日期
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                // 检查是否是今天
+                if (currentCalendarYear === todayYear && 
+                    currentCalendarMonth === todayMonth && 
+                    day === todayDate) {
+                    dayElement.classList.add('today');
+                }
+                
+                // 检查这一天是否有消息
+                const dateKey = `${currentCalendarYear}年${currentCalendarMonth + 1}月${day}日`;
+                if (messagesByDate[dateKey]) {
+                    dayElement.classList.add('has-messages');
+                    
+                    // 添加消息数量
+                    const messageCount = document.createElement('div');
+                    messageCount.className = 'message-count';
+                    messageCount.textContent = messagesByDate[dateKey].length;
+                    dayElement.appendChild(messageCount);
+                }
+                
+                // 添加点击事件
+                dayElement.addEventListener('click', () => {
+                    if (messagesByDate[dateKey]) {
+                        // 跳转到该日期第一条消息
+                        const dateMessages = messagesByDate[dateKey];
+                        if (dateMessages.length > 0) {
+                            const firstMsgId = dateMessages[0].id;
+                            const messageElements = document.querySelectorAll('.message');
+                            for (let element of messageElements) {
+                                if (element.querySelector('.message-bubble')?.textContent.includes(dateMessages[0].text)) {
+                                    element.scrollIntoView({ behavior: 'smooth' });
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // 关闭模态框
+                        dateModal.style.display = 'none';
+                    }
+                });
+                
+                calendarBody.appendChild(dayElement);
+            }
+            
+            calendar.appendChild(calendarBody);
+        }
+        
+        // 获取按日期分组的消息
+        function getMessagesByDate() {
+            const grouped = {};
+            
+            messages.forEach(msg => {
+                const date = msg.date;
+                if (!grouped[date]) {
+                    grouped[date] = [];
+                }
+                grouped[date].push(msg);
+            });
+            
+            return grouped;
+        }
+        
+        // 保存昵称
+        function saveNickname() {
+            const newNickname = nicknameInput.value.trim();
+            
+            if (newNickname === '') {
+                alert('昵称不能为空');
+                return;
+            }
+            
+            nickname = newNickname;
+            
+            // 更新显示
+            nicknameDisplay.textContent = nickname;
+            partnerName.textContent = nickname;
+            
+            // 切换显示
+            nicknameDisplay.style.display = 'block';
+            nicknameEdit.style.display = 'none';
+            
+            // 保存到本地存储
+            localStorage.setItem('secretNickname', nickname);
+        }
+        
+        // 取消编辑昵称
+        function cancelNickname() {
+            nicknameDisplay.style.display = 'block';
+            nicknameEdit.style.display = 'none';
+        }
+        
+        // 更新个人资料页面
+        function updateProfilePage() {
+            // 更新昵称显示
+            nicknameDisplay.textContent = nickname;
+            
+            // 更新状态
+            setRandomStatus();
+            
+            // 更新消息统计
+            updateStatsList();
+        }
+        
+        // 设置随机状态
+        function setRandomStatus() {
+            const randomStatus = statusList[Math.floor(Math.random() * statusList.length)];
+            statusContent.textContent = randomStatus;
+            
+            // 保存到本地存储
+            localStorage.setItem('secretStatus', randomStatus);
+        }
+        
+// 更新消息统计列表
+function updateStatsList() {
+    statsList.innerHTML = '';
+    
+    // 如果没有统计数据，显示提示
+    if (Object.keys(replyStats).length === 0) {
+        const noStats = document.createElement('div');
+        noStats.textContent = '暂无消息统计';
+        noStats.style.textAlign = 'center';
+        noStats.style.padding = '20px';
+        noStats.style.color = '#999';
+        statsList.appendChild(noStats);
+        return;
+    }
+    
+    // 将统计对象转换为数组并按次数从多到少排序
+    const sortedStats = Object.entries(replyStats)
+        .sort((a, b) => b[1] - a[1]) // 按次数从多到少排序
+        .map(([message, count]) => ({ message, count }));
+    
+    // 添加统计项
+    sortedStats.forEach(item => {
+        const message = item.message;
+        const count = item.count;
+        
+        const statItem = document.createElement('div');
+        statItem.className = 'stat-item';
+        
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = message.length > 15 ? message.substring(0, 15) + '...' : message;
+        
+        const countSpan = document.createElement('span');
+        countSpan.textContent = `${count}次`;
+        countSpan.style.color = '#ff6b93';
+        countSpan.style.fontWeight = 'bold';
+        
+        statItem.appendChild(messageSpan);
+        statItem.appendChild(countSpan);
+        
+        statsList.appendChild(statItem);
+    });
+}        
+        // 计算恋爱天数
+        function calculateDaysInRelationship() {
+            const today = new Date();
+            const startDate = relationshipStartDate;
+            
+            // 计算天数差
+            const timeDiff = today.getTime() - startDate.getTime();
+            const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+            
+            daysCount.textContent = daysDiff;
+            document.getElementById('days-text').textContent = `从${startDate.getFullYear()}年${startDate.getMonth()+1}月${startDate.getDate()}日开始`;
+            
+            return daysDiff;
+        }
+        
+        // 显示恋爱天数弹窗
+        function showDaysModal() {
+            daysModal.style.display = 'flex';
+            calculateDaysInRelationship();
+        }
+        
+        // 滚动到底部
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 100);
+        }
+        
+        // 保存到本地存储
+        function saveToLocalStorage() {
+            localStorage.setItem('secretMessages', JSON.stringify(messages));
+            localStorage.setItem('secretReplyStats', JSON.stringify(replyStats));
+        }
+        
+        // 从本地存储加载
+        function loadFromLocalStorage() {
+            // 加载消息
+            const savedMessages = localStorage.getItem('secretMessages');
+            if (savedMessages) {
+                messages = JSON.parse(savedMessages);
+                // 将时间字符串转换为Date对象
+                messages.forEach(msg => {
+                    msg.time = new Date(msg.time);
+                });
+            }
+            
+            // 加载回复统计
+            const savedStats = localStorage.getItem('secretReplyStats');
+            if (savedStats) {
+                replyStats = JSON.parse(savedStats);
+            }
+            
+            // 加载昵称
+            const savedNickname = localStorage.getItem('secretNickname');
+            if (savedNickname) {
+                nickname = savedNickname;
+                partnerName.textContent = nickname;
+            }
+            
+            // 加载状态
+            const savedStatus = localStorage.getItem('secretStatus');
+            if (savedStatus) {
+                statusContent.textContent = savedStatus;
+            }
+        }
+        
+        // 工具函数：格式化日期 (YYYY年MM月DD日)
+        function getFormattedDate(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${year}年${month}月${day}日`;
+        }
+        
+        // 工具函数：格式化时间 (HH:MM)
+        function formatTime(date) {
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+    </script>
+</body>
+</html>
